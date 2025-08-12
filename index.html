@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur d'Images IA</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-magic"></i> Générateur d'Images IA</h1>
+            <button id="night-mode-toggle" class="night-mode-toggle" aria-label="Basculer le mode nuit">
+                <i class="fas fa-moon"></i>
+            </button>
+        </header>
+        
+        <div class="input-section">
+            <div class="prompt-container">
+                <label for="prompt-input">Décrivez votre image :</label>
+                <textarea id="prompt-input" placeholder="Décrivez l'image que vous voulez générer..." rows="3"></textarea>
+            </div>
+            
+            <div class="structured-prompts">
+                <h3>Prompts suggérés :</h3>
+                <div class="prompt-buttons">
+                    <button class="prompt-btn" data-prompt="Un paysage de montagne époustouflant au lever du soleil, couleurs vives, style impressionniste">
+                        <i class="fas fa-mountain"></i> Paysage
+                    </button>
+                    <button class="prompt-btn" data-prompt="Un chaton jouant avec une pelote de laine, gros plan, photographie macro, lumière douce">
+                        <i class="fas fa-cat"></i> Animal
+                    </button>
+                    <button class="prompt-btn" data-prompt="Une ville futuriste la nuit, néons, voitures volantes, style cyberpunk">
+                        <i class="fas fa-city"></i> Futuriste
+                    </button>
+                    <button class="prompt-btn" data-prompt="Un portrait d'une femme âgée souriante, rides détaillées, lumière naturelle, réalisme">
+                        <i class="fas fa-user"></i> Portrait
+                    </button>
+                    <button class="prompt-btn" data-prompt="Un dragon crachant du feu sur un château médiéval, fantaisie épique, art numérique">
+                        <i class="fas fa-dragon"></i> Fantaisie
+                    </button>
+                </div>
+            </div>
+            
+            <div class="options">
+                <div class="option-group">
+                    <label for="width-select"><i class="fas fa-arrows-alt-h"></i> Largeur :</label>
+                    <select id="width-select">
+                        <option value="512">512px</option>
+                        <option value="768" selected>768px</option>
+                        <option value="1024">1024px</option>
+                    </select>
+                </div>
+                
+                <div class="option-group">
+                    <label for="height-select"><i class="fas fa-arrows-alt-v"></i> Hauteur :</label>
+                    <select id="height-select">
+                        <option value="512">512px</option>
+                        <option value="768" selected>768px</option>
+                        <option value="1024">1024px</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button id="generate-btn" class="generate-btn">
+                <i class="fas fa-wand-magic-sparkles"></i>
+                <span>Générer l'image</span>
+            </button>
+        </div>
+        
+        <div class="preview-section">
+            <h2><i class="fas fa-image"></i> Prévisualisation de l'image</h2>
+            <div class="image-placeholder">
+                <div class="placeholder-content">
+                    <i class="fas fa-image placeholder-icon"></i>
+                    <p>Votre image générée apparaîtra ici</p>
+                </div>
+                <img id="generated-image" src="" alt="Image générée">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>Génération en cours...</p>
+                </div>
+                <div id="error-message" class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <h2><i class="fas fa-history"></i> Historique des générations</h2>
+            <div id="history-list" class="history-list">
+                <div class="no-history">
+                    <i class="fas fa-clock"></i>
+                    <p>Aucune génération récente</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
+
+
