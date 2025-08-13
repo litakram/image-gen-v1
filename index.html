@@ -18,28 +18,104 @@
         
         <div class="input-section">
             <div class="prompt-container">
-                <label for="prompt-input">Décrivez votre image :</label>
-                <textarea id="prompt-input" placeholder="Décrivez l'image que vous voulez générer..." rows="3"></textarea>
+                <label for="prompt-input">Décrivez votre image : <span class="gemini-badge"><i class="fas fa-magic"></i> Amélioré par Gemini</span></label>
+                <textarea id="prompt-input" placeholder="Décrivez l'image que vous voulez générer... Gemini optimisera votre description automatiquement" rows="3"></textarea>
             </div>
             
             <div class="structured-prompts">
-                <h3>Prompts suggérés :</h3>
-                <div class="prompt-buttons">
-                    <button class="prompt-btn" data-prompt="Un paysage de montagne époustouflant au lever du soleil, couleurs vives, style impressionniste">
-                        <i class="fas fa-mountain"></i> Paysage
-                    </button>
-                    <button class="prompt-btn" data-prompt="Un chaton jouant avec une pelote de laine, gros plan, photographie macro, lumière douce">
-                        <i class="fas fa-cat"></i> Animal
-                    </button>
-                    <button class="prompt-btn" data-prompt="Une ville futuriste la nuit, néons, voitures volantes, style cyberpunk">
-                        <i class="fas fa-city"></i> Futuriste
-                    </button>
-                    <button class="prompt-btn" data-prompt="Un portrait d'une femme âgée souriante, rides détaillées, lumière naturelle, réalisme">
-                        <i class="fas fa-user"></i> Portrait
-                    </button>
-                    <button class="prompt-btn" data-prompt="Un dragon crachant du feu sur un château médiéval, fantaisie épique, art numérique">
-                        <i class="fas fa-dragon"></i> Fantaisie
-                    </button>
+                <h3>Styles suggérés :</h3>
+                
+                <div class="prompt-category">
+                    <h4><i class="fas fa-palette"></i> Styles artistiques</h4>
+                    <div class="prompt-buttons">
+                        <button class="prompt-btn" data-prompt="Une forêt enchantée" data-style="style impressionniste, couleurs vives, coups de pinceau visibles">
+                            <i class="fas fa-paint-brush"></i> Impressionnisme
+                        </button>
+                        <button class="prompt-btn" data-prompt="Un portrait abstrait" data-style="style cubiste, formes géométriques, palette de couleurs limitée">
+                            <i class="fas fa-shapes"></i> Cubisme
+                        </button>
+                        <button class="prompt-btn" data-prompt="Un paysage urbain" data-style="style pixel art, résolution basse, palette rétro">
+                            <i class="fas fa-th"></i> Pixel Art
+                        </button>
+                        <button class="prompt-btn" data-prompt="Un café parisien" data-style="aquarelle délicate, couleurs douces, touches légères">
+                            <i class="fas fa-tint"></i> Aquarelle
+                        </button>
+                        <button class="prompt-btn" data-prompt="Un navire en mer" data-style="style néo-classique, précision des détails, perspective rigoureuse">
+                            <i class="fas fa-landmark"></i> Néo-classique
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="prompt-category">
+                    <h4><i class="fas fa-camera"></i> Photographie</h4>
+                    <div class="prompt-buttons">
+                        <button class="prompt-btn" data-prompt="Un lever de soleil sur la plage" data-style="photographie HDR, haute résolution, grande profondeur de champ">
+                            <i class="fas fa-sun"></i> Paysage HDR
+                        </button>
+                        <button class="prompt-btn" data-prompt="Un insecte sur une fleur" data-style="macro photographie, mise au point précise, arrière-plan flou">
+                            <i class="fas fa-bug"></i> Macro
+                        </button>
+                        <button class="prompt-btn" data-prompt="Une rue de New York" data-style="photographie noir et blanc, contraste élevé, grain visible">
+                            <i class="fas fa-adjust"></i> Noir et Blanc
+                        </button>
+                        <button class="prompt-btn" data-prompt="Un portrait en studio" data-style="éclairage Rembrandt, fond noir, contraste dramatique">
+                            <i class="fas fa-user"></i> Portrait Studio
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="prompt-category">
+                    <h4><i class="fas fa-hat-wizard"></i> Fantastique & Sci-Fi</h4>
+                    <div class="prompt-buttons">
+                        <button class="prompt-btn" data-prompt="Un dragon gardant son trésor" data-style="fantasy épique, couleurs riches, détails minutieux">
+                            <i class="fas fa-dragon"></i> Fantasy
+                        </button>
+                        <button class="prompt-btn" data-prompt="Une station spatiale orbitale" data-style="science-fiction réaliste, éclairage technique, design futuriste">
+                            <i class="fas fa-space-shuttle"></i> Sci-Fi
+                        </button>
+                        <button class="prompt-btn" data-prompt="Une ville cyberpunk" data-style="néons vifs, pluie constante, contraste élevé, atmosphère nocturne">
+                            <i class="fas fa-city"></i> Cyberpunk
+                        </button>
+                        <button class="prompt-btn" data-prompt="Un portail magique" data-style="fantasy mystique, brume éthérée, lueurs magiques">
+                            <i class="fas fa-door-open"></i> Mystique
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="prompt-category">
+                    <h4><i class="fas fa-globe-americas"></i> Paysages</h4>
+                    <div class="prompt-buttons">
+                        <button class="prompt-btn" data-prompt="Montagnes majestueuses" data-style="panorama alpin, neige éternelle, ciel azur, haute définition">
+                            <i class="fas fa-mountain"></i> Montagnes
+                        </button>
+                        <button class="prompt-btn" data-prompt="Une plage tropicale" data-style="eaux turquoise, sable blanc, palmiers, lumière dorée">
+                            <i class="fas fa-umbrella-beach"></i> Plage
+                        </button>
+                        <button class="prompt-btn" data-prompt="Une forêt dense" data-style="lumière filtrant à travers les feuilles, mousse, atmosphère mystérieuse">
+                            <i class="fas fa-tree"></i> Forêt
+                        </button>
+                        <button class="prompt-btn" data-prompt="Un désert au coucher du soleil" data-style="dunes de sable, ciel orangé, ombres longues">
+                            <i class="fas fa-wind"></i> Désert
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="prompt-category">
+                    <h4><i class="fas fa-paint-roller"></i> Concepts abstraits</h4>
+                    <div class="prompt-buttons">
+                        <button class="prompt-btn" data-prompt="Le concept d'amour" data-style="art abstrait, couleurs chaudes, formes fluides">
+                            <i class="fas fa-heart"></i> Amour
+                        </button>
+                        <button class="prompt-btn" data-prompt="Le concept du temps" data-style="surréalisme, montres fondantes, perspective impossible">
+                            <i class="fas fa-hourglass"></i> Temps
+                        </button>
+                        <button class="prompt-btn" data-prompt="Le concept de liberté" data-style="technique mixte, tons bleus, mouvement ascendant">
+                            <i class="fas fa-dove"></i> Liberté
+                        </button>
+                        <button class="prompt-btn" data-prompt="Le concept de croissance" data-style="art organique, fractales, tons verts, motifs naturels">
+                            <i class="fas fa-seedling"></i> Croissance
+                        </button>
+                    </div>
                 </div>
             </div>
             

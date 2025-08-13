@@ -7,6 +7,8 @@
 // Configuration
 const CONFIG = {
     API_BASE_URL: 'https://image.pollinations.ai/prompt',
+    GEMINI_API_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
+    GEMINI_API_KEY: 'AIzaSyCpY4V7DVwJSNBOJWNi-E6wK8BIVWHYzXU', // Clé API Gemini
     MAX_HISTORY: 5,
     STORAGE_KEY: 'ai-image-generator-history',
     NIGHT_MODE_KEY: 'ai-image-generator-night-mode'
@@ -25,6 +27,7 @@ const DOM = {
     historyList: document.getElementById('history-list'),
     nightModeToggle: document.getElementById('night-mode-toggle'),
     promptButtons: document.querySelectorAll('.prompt-btn'),
+    promptCategories: document.querySelectorAll('.prompt-category'),
     placeholderContent: document.querySelector('.placeholder-content'),
     noHistory: document.querySelector('.no-history')
 };
@@ -32,6 +35,7 @@ const DOM = {
 // État de l'application
 let generationHistory = [];
 let isGenerating = false;
+let selectedStyle = ''; // Variable globale pour stocker le style actuellement sélectionné
 
 /**
  * Initialise l'application
@@ -66,32 +70,117 @@ function setupEventListeners() {
     // Mode nuit
     DOM.nightModeToggle.addEventListener('click', toggleNightMode);
     
-    // Prompts structurés
+    // Prompts structurés - utilisation uniquement du style sans changer l'input
     DOM.promptButtons.forEach(button => {
         button.addEventListener('click', () => {
-            const prompt = button.dataset.prompt;
-            DOM.promptInput.value = prompt;
+            // On récupère uniquement le style
+            selectedStyle = button.dataset.style || '';
+            
+            // On ne modifie PAS le contenu du champ de saisie
+            // mais on garde le focus sur le champ
             DOM.promptInput.focus();
+            
+            // Mise en surbrillance du bouton actif
+            document.querySelectorAll('.prompt-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            button.classList.add('active');
             
             // Animation de feedback
             button.style.transform = 'scale(0.95)';
             setTimeout(() => {
                 button.style.transform = '';
             }, 150);
+            
+            // Indication visuelle du style sélectionné
+            const styleBadge = document.getElementById('selected-style-badge') || createStyleBadge();
+            updateStyleBadge(styleBadge, selectedStyle);
+            
+            console.log('� Style suggéré sélectionné:', selectedStyle);
         });
     });
+    
+    // Fonction pour créer le badge de style
+    function createStyleBadge() {
+        const badge = document.createElement('div');
+        badge.id = 'selected-style-badge';
+        badge.className = 'selected-style-badge';
+        
+        // Ajouter à côté du bouton générer
+        DOM.generateBtn.parentNode.insertBefore(badge, DOM.generateBtn);
+        return badge;
+    }
+    
+    // Mettre à jour le badge de style
+    function updateStyleBadge(badge, style) {
+        if (!style) {
+            badge.style.display = 'none';
+            return;
+        }
+        
+        badge.style.display = 'flex';
+        badge.innerHTML = `<i class="fas fa-palette"></i> Style: <span>${style}</span>
+                          <button class="clear-style"><i class="fas fa-times"></i></button>`;
+        
+        // Ajouter un gestionnaire pour effacer le style
+        const clearBtn = badge.querySelector('.clear-style');
+        clearBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            selectedStyle = '';
+            badge.style.display = 'none';
+            
+            // Déselectionner tous les boutons
+            document.querySelectorAll('.prompt-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+        });
+    }
     
     // Accessibilité - navigation au clavier pour les prompts
     DOM.promptButtons.forEach((button, index) => {
         button.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+            const currentCategory = button.closest('.prompt-category');
+            const categoryButtons = Array.from(currentCategory.querySelectorAll('.prompt-btn'));
+            const buttonIndexInCategory = categoryButtons.indexOf(button);
+            
+            if (e.key === 'ArrowRight') {
                 e.preventDefault();
-                const nextIndex = (index + 1) % DOM.promptButtons.length;
-                DOM.promptButtons[nextIndex].focus();
-            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                const nextIndex = (buttonIndexInCategory + 1) % categoryButtons.length;
+                categoryButtons[nextIndex].focus();
+            } else if (e.key === 'ArrowLeft') {
                 e.preventDefault();
-                const prevIndex = (index - 1 + DOM.promptButtons.length) % DOM.promptButtons.length;
-                DOM.promptButtons[prevIndex].focus();
+                const prevIndex = (buttonIndexInCategory - 1 + categoryButtons.length) % categoryButtons.length;
+                categoryButtons[prevIndex].focus();
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                // Aller à la catégorie suivante
+                const categories = Array.from(document.querySelectorAll('.prompt-category'));
+                const categoryIndex = categories.indexOf(currentCategory);
+                const nextCategoryIndex = (categoryIndex + 1) % categories.length;
+                
+                if (categories[nextCategoryIndex]) {
+                    const nextCategoryButtons = categories[nextCategoryIndex].querySelectorAll('.prompt-btn');
+                    if (nextCategoryButtons.length > 0) {
+                        // Essayer de conserver la même position horizontale
+                        const targetIndex = Math.min(buttonIndexInCategory, nextCategoryButtons.length - 1);
+                        nextCategoryButtons[targetIndex].focus();
+                    }
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                // Aller à la catégorie précédente
+                const categories = Array.from(document.querySelectorAll('.prompt-category'));
+                const categoryIndex = categories.indexOf(currentCategory);
+                const prevCategoryIndex = (categoryIndex - 1 + categories.length) % categories.length;
+                
+                if (categories[prevCategoryIndex]) {
+                    const prevCategoryButtons = categories[prevCategoryIndex].querySelectorAll('.prompt-btn');
+                    if (prevCategoryButtons.length > 0) {
+                        // Essayer de conserver la même position horizontale
+                        const targetIndex = Math.min(buttonIndexInCategory, prevCategoryButtons.length - 1);
+                        prevCategoryButtons[targetIndex].focus();
+                    }
+                }
             }
         });
     });
@@ -111,6 +200,134 @@ function sanitizeInput(input) {
         .replace(/[<>\"'&]/g, '') // Supprime les caractères HTML dangereux
         .replace(/[{}[\]]/g, '') // Supprime les caractères de structure
         .substring(0, 500); // Limite à 500 caractères
+}
+
+/**
+ * Analyse le prompt pour identifier s'il provient des suggestions structurées
+ * @param {string} prompt - Le prompt à analyser
+ * @returns {Object} Informations sur le prompt (sujet, style, etc.)
+ */
+function analyzePrompt(prompt) {
+    // Vérifier si le prompt suit le format "sujet, style"
+    const parts = prompt.split(',').map(part => part.trim());
+    
+    // Si nous avons au moins 2 parties, considérons la première comme sujet et le reste comme style
+    if (parts.length >= 2) {
+        return {
+            subject: parts[0],
+            style: parts.slice(1).join(', '),
+            isStructured: true
+        };
+    }
+    
+    // Sinon c'est un prompt libre
+    return {
+        subject: prompt,
+        style: '',
+        isStructured: false
+    };
+}
+
+/**
+ * Améliore le prompt utilisateur avec l'API Gemini
+ * Transforme un prompt simple en description détaillée pour de meilleurs résultats
+ * @param {string} prompt - Prompt original de l'utilisateur
+ * @returns {Promise<string>} - Prompt amélioré ou prompt original en cas d'erreur
+ */
+async function enhancePromptWithGemini(prompt) {
+    console.log('🧠 Demande d\'amélioration du prompt à Gemini:', prompt);
+    console.log('🎭 Style sélectionné:', selectedStyle ? selectedStyle : 'Aucun style sélectionné');
+    
+    try {
+        // Construction du message pour Gemini en fonction du style sélectionné ou non
+        let geminiPrompt;
+        
+        if (selectedStyle) {
+            // Si un style est sélectionné, on l'applique directement au prompt utilisateur
+            console.log('🎭 Application du style suggéré:', selectedStyle);
+            
+            geminiPrompt = `Crée un prompt détaillé pour générer une image IA de haute qualité.
+                           Sujet de l'image: "${prompt}"
+                           Style artistique à appliquer: "${selectedStyle}"
+                           
+                           Développe ce prompt en combinant le sujet demandé avec le style indiqué:
+                           1. Garde le sujet principal exactement comme demandé
+                           2. Applique le style artistique spécifié de manière cohérente
+                           3. Ajoute des détails visuels précis sur la composition, l'éclairage, les couleurs
+                           4. Enrichis avec des éléments techniques qui renforcent le style mentionné
+                           
+                           Format de réponse: une description détaillée, concise et cohérente.
+                           Maximum 100 mots. Pas d'introduction ni de conclusion.`;
+        } else {
+            // Si aucun style n'est sélectionné, analyse du prompt pour l'amélioration standard
+            const promptInfo = analyzePrompt(prompt);
+            
+            if (promptInfo.isStructured) {
+                geminiPrompt = `Crée un prompt détaillé pour générer une image IA de haute qualité.
+                               Sujet principal: "${promptInfo.subject}"
+                               Style indiqué: "${promptInfo.style}"
+                               
+                               Développe ce prompt en enrichissant ces éléments:
+                               1. Description visuelle précise du sujet principal
+                               2. Détails sur la composition, l'éclairage, les couleurs, la perspective
+                               3. Ambiance et atmosphère générale
+                               4. Détails techniques comme la résolution, le rendu, les effets spécifiques
+                               
+                               Format de réponse: une description détaillée, concise et cohérente.
+                               Maximum 100 mots. Pas d'introduction ni de conclusion.`;
+            } else {
+                geminiPrompt = `Améliore ce prompt pour générer une image IA de haute qualité: "${prompt}"
+                               
+                               Ne change pas le sujet principal mais ajoute des détails sur:
+                               - Style artistique et technique de rendu
+                               - Éclairage, ombres et atmosphère
+                               - Perspective, composition et cadrage
+                               - Couleurs, contrastes et tonalités
+                               - Détails qui ajoutent du réalisme ou de l'impact
+                               
+                               Maximum 100 mots. Pas d'introduction ni de conclusion.`;
+            }
+        }
+        
+        // Construit le corps de la requête pour l'API Gemini
+        const requestBody = {
+            contents: [{
+                parts: [{
+                    text: geminiPrompt
+                }]
+            }]
+        };
+        
+        // Appel à l'API Gemini
+        const response = await fetch(CONFIG.GEMINI_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-goog-api-key': CONFIG.GEMINI_API_KEY
+            },
+            body: JSON.stringify(requestBody)
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Erreur API Gemini: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        // Extraction du texte amélioré depuis la réponse
+        if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+            const enhancedPrompt = data.candidates[0].content.parts[0].text.trim();
+            console.log('🎨 Prompt amélioré par Gemini:', enhancedPrompt);
+            return enhancedPrompt;
+        } else {
+            console.warn('⚠️ Format de réponse Gemini inattendu:', data);
+            return prompt; // En cas de réponse mal formatée, on retourne le prompt original
+        }
+    } catch (error) {
+        console.error('❌ Erreur lors de l\'amélioration du prompt avec Gemini:', error);
+        // En cas d'erreur, on retourne le prompt original
+        return prompt;
+    }
 }
 
 /**
@@ -199,6 +416,79 @@ function showError(message) {
 }
 
 /**
+ * Affiche une notification montrant comment Gemini a amélioré le prompt
+ * @param {string} originalPrompt - Le prompt original de l'utilisateur
+ * @param {string} enhancedPrompt - Le prompt amélioré par Gemini
+ * @param {string} appliedStyle - Le style appliqué, s'il y en a un
+ */
+function showPromptEnhancementNotification(originalPrompt, enhancedPrompt, appliedStyle = '') {
+    // Supprimer les anciennes notifications
+    const existingNotifs = document.querySelectorAll('.prompt-enhancement-notification');
+    existingNotifs.forEach(notif => notif.remove());
+    
+    // Créer une nouvelle notification
+    const notification = document.createElement('div');
+    notification.className = 'prompt-enhancement-notification';
+    
+    // Contenu de base de la notification
+    let notificationContent = `
+        <div class="notification-header">
+            <i class="fas fa-magic"></i> Prompt amélioré par Gemini
+            <button class="close-btn"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="notification-content">
+    `;
+    
+    // Ajouter le style appliqué s'il y en a un
+    if (appliedStyle) {
+        notificationContent += `
+            <div class="applied-style">
+                <i class="fas fa-palette"></i> Style appliqué: <span>${appliedStyle}</span>
+            </div>
+        `;
+    }
+    
+    // Ajouter la comparaison des prompts
+    notificationContent += `
+            <div class="prompt-comparison">
+                <div class="prompt-original">
+                    <h4>Prompt original</h4>
+                    <p>${originalPrompt}</p>
+                </div>
+                <div class="prompt-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+                <div class="prompt-enhanced">
+                    <h4>Prompt amélioré</h4>
+                    <p>${enhancedPrompt}</p>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    notification.innerHTML = notificationContent;
+    
+    // Ajouter au DOM
+    document.body.appendChild(notification);
+    
+    // Animation d'entrée
+    setTimeout(() => {
+        notification.classList.add('visible');
+    }, 100);
+    
+    // Fonction de fermeture uniquement lorsque l'utilisateur clique sur X
+    const closeBtn = notification.querySelector('.close-btn');
+    closeBtn.addEventListener('click', () => {
+        notification.classList.remove('visible');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    });
+    
+    // Aucune fermeture automatique - la notification reste jusqu'à ce que l'utilisateur la ferme
+}
+
+/**
  * Affiche l'image générée
  * @param {string} imageUrl - URL de l'image
  */
@@ -242,7 +532,11 @@ async function handleGenerate() {
     showLoading();
     
     try {
-        const apiUrl = buildApiUrl(sanitizedPrompt, width, height);
+        // Amélioration du prompt avec Gemini
+        const enhancedPrompt = await enhancePromptWithGemini(sanitizedPrompt);
+        
+        // Utilisation du prompt amélioré pour la génération d'image
+        const apiUrl = buildApiUrl(enhancedPrompt, width, height);
         console.log('🔗 URL API:', apiUrl);
         
         // Génération avec timeout
@@ -270,17 +564,35 @@ async function handleGenerate() {
         
         showGeneratedImage(imageUrl);
         
-        // Ajout à l'historique
+        // Afficher une notification avec le prompt amélioré
+        showPromptEnhancementNotification(rawPrompt, enhancedPrompt, selectedStyle);
+        
+        // Ajout à l'historique avec le prompt original et le prompt amélioré
         addToHistory({
-            prompt: sanitizedPrompt,
+            prompt: enhancedPrompt,
             originalPrompt: rawPrompt,
+            enhancedPrompt: enhancedPrompt, // Sauvegarde du prompt amélioré
+            appliedStyle: selectedStyle,    // Style utilisé pour cette génération
             imageUrl,
             width,
             height,
             timestamp: Date.now()
         });
         
+        // Réinitialiser le style sélectionné après génération
+        if (selectedStyle) {
+            console.log('🧹 Réinitialisation du style après génération:', selectedStyle);
+            selectedStyle = '';
+            document.querySelectorAll('.prompt-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const styleBadge = document.getElementById('selected-style-badge');
+            if (styleBadge) styleBadge.style.display = 'none';
+        }
+        
         console.log('✅ Image générée avec succès');
+        console.log('📝 Prompt original:', rawPrompt);
+        console.log('🧠 Prompt amélioré utilisé:', enhancedPrompt);
         
     } catch (error) {
         console.error('❌ Erreur lors de la génération:', error);
@@ -293,6 +605,8 @@ async function handleGenerate() {
             errorMessage = 'Problème de connexion. Vérifiez votre connexion internet.';
         } else if (error.message.includes('HTTP')) {
             errorMessage = 'Erreur du serveur. Veuillez réessayer dans quelques instants.';
+        } else if (error.message.includes('Gemini')) {
+            errorMessage = 'Erreur lors de l\'amélioration du prompt. Veuillez réessayer.';
         }
         
         showError(errorMessage);
@@ -372,6 +686,21 @@ function createHistoryItem(item, index) {
     historyItem.setAttribute('tabindex', '0');
     historyItem.setAttribute('aria-label', `Réutiliser: ${item.originalPrompt}`);
     
+    // Ajouter une info-bulle avec les prompts (original et amélioré)
+    const tooltipText = item.enhancedPrompt ? 
+        `Original: "${item.originalPrompt}"\nAmélioré: "${item.enhancedPrompt}"` : 
+        item.originalPrompt;
+    historyItem.setAttribute('title', tooltipText);
+    
+    // Ajouter une indication visuelle que le prompt a été amélioré
+    if (item.enhancedPrompt && item.enhancedPrompt !== item.originalPrompt) {
+        const enhancedBadge = document.createElement('div');
+        enhancedBadge.className = 'enhanced-badge';
+        enhancedBadge.innerHTML = '<i class="fas fa-magic"></i>';
+        enhancedBadge.title = 'Prompt amélioré par IA';
+        historyItem.appendChild(enhancedBadge);
+    }
+    
     const img = document.createElement('img');
     img.src = item.imageUrl;
     img.alt = item.originalPrompt;
@@ -381,7 +710,15 @@ function createHistoryItem(item, index) {
     
     // Gestionnaire de clic/clavier
     const handleActivation = () => {
+        // Par défaut, on met le prompt original dans le champ de saisie
         DOM.promptInput.value = item.originalPrompt;
+        
+        // On peut aussi ajouter une option pour utiliser directement le prompt amélioré
+        // si le clic est fait avec la touche Alt ou Shift
+        if (window.event && (window.event.altKey || window.event.shiftKey) && item.enhancedPrompt) {
+            DOM.promptInput.value = item.enhancedPrompt;
+        }
+        
         DOM.widthSelect.value = item.width;
         DOM.heightSelect.value = item.height;
         showGeneratedImage(item.imageUrl);

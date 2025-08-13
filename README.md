@@ -1,4 +1,4 @@
-# Générateur d'Images IA         https://image-gen-v1.surge.sh/
+# Générateur d'Images IA
 
 Une plateforme web moderne et responsive pour générer des images à partir de descriptions textuelles en utilisant l'API Pollinations AI.
 
