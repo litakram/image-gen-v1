@@ -8,7 +8,7 @@
 const CONFIG = {
     API_BASE_URL: 'https://image.pollinations.ai/prompt',
     GEMINI_API_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
-    GEMINI_API_KEY: 'AIzaSyCpY4V7DVwJSNBOJWNi-E6wK8BIVWHYzXU', // Clé API Gemini
+    GEMINI_API_KEY: '', // Clé API Gemini
     MAX_HISTORY: 5,
     STORAGE_KEY: 'ai-image-generator-history',
     NIGHT_MODE_KEY: 'ai-image-generator-night-mode'
