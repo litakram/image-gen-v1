@@ -1,4 +1,4 @@
-# 🎨 Générateur d'Images IA avec Gemini
+# 🎨 Générateur d'Images IA avec Gemini     /https://image-gen-v1.surge.sh/
 
 Une application web moderne qui combine l'intelligence artificielle de Google Gemini et Pollinations AI pour générer des images de haute qualité à partir de descriptions textuelles.
 
