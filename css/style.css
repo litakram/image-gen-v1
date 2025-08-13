@@ -634,8 +634,33 @@ body.night-mode .night-mode-toggle i::before {
     transition: var(--transition);
 }
 
+.details-badge {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    box-shadow: var(--shadow-md);
+    z-index: 2;
+    opacity: 0;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
 .history-item:hover .enhanced-badge {
     transform: scale(1.2);
+    opacity: 1;
+}
+
+.history-item:hover .details-badge {
+    transform: scale(1.1);
     opacity: 1;
 }
 

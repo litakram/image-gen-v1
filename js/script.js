@@ -697,9 +697,16 @@ function createHistoryItem(item, index) {
         const enhancedBadge = document.createElement('div');
         enhancedBadge.className = 'enhanced-badge';
         enhancedBadge.innerHTML = '<i class="fas fa-magic"></i>';
-        enhancedBadge.title = 'Prompt amélioré par IA';
+        enhancedBadge.title = 'Prompt amélioré par IA - Cliquez pour voir la comparaison';
         historyItem.appendChild(enhancedBadge);
     }
+    
+    // Ajouter un badge "Voir détails" pour indiquer à l'utilisateur qu'il peut cliquer
+    const detailsBadge = document.createElement('div');
+    detailsBadge.className = 'details-badge';
+    detailsBadge.innerHTML = '<i class="fas fa-search-plus"></i>';
+    detailsBadge.title = 'Cliquez pour voir les détails et la comparaison des prompts';
+    historyItem.appendChild(detailsBadge);
     
     const img = document.createElement('img');
     img.src = item.imageUrl;
@@ -722,6 +729,12 @@ function createHistoryItem(item, index) {
         DOM.widthSelect.value = item.width;
         DOM.heightSelect.value = item.height;
         showGeneratedImage(item.imageUrl);
+        
+        // Afficher la notification de comparaison des prompts
+        if (item.originalPrompt && item.enhancedPrompt) {
+            showPromptEnhancementNotification(item.originalPrompt, item.enhancedPrompt, item.appliedStyle || '');
+        }
+        
         DOM.promptInput.focus();
         
         // Animation de feedback
